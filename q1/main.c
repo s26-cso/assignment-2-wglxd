@@ -26,3 +26,17 @@ struct Node* insert(struct Node* root, int val){
     }
 }
 
+struct Node *get(struct Node *root, int val){
+    if(root == NULL){
+        return root;
+    }else{
+        if(val < root->val){
+            return get(root->left, val);
+        }else if(val > root->val){
+            return get(root->right, val);
+        }else{
+            return root;
+        }
+    }
+}
+

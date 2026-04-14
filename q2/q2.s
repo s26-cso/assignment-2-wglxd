@@ -2,8 +2,7 @@
 fmt: .string "%ld "
 fmt_nl: .string "\n"
 
-.section .bss
-    .lcomm arr, 8000
+
 
 .section .text
 .globl main
@@ -14,7 +13,15 @@ main:
     addi s2, x10, -1         #x12 -> s2 = n = argc - 1
     addi x11, x11, 8         #skip argv[0] (8 bytes now)
     addi s3, x11, 0          #x11 -> s3 = argv pointer
-    la   s4, arr             #x13 -> s4 = arr base pointer
+                             #malloc for arr
+    addi sp, sp, -16         
+    sd x1, 0(sp)             
+    addi x10, s2, 0          #Move n to a0
+    slli x10, x10, 3         #n*8 bytes
+    call malloc
+    addi s4, x10, 0          #s4 = arr base pointer
+    ld x1, 0(sp)
+    addi sp, sp, 16
     addi x14, x0, 0          #x14 = i = 0
 read_loop:
     bge  x14, s2, read_done
@@ -23,10 +30,10 @@ read_loop:
     ld   x10, 0(x15)
     
     addi sp, sp, -32         
-    sd ra, 0(sp)             
+    sd x1, 0(sp)             
     sd x14, 8(sp)            #Save loop index
-    call atoi
-    ld ra, 0(sp)             
+    call atoi                #Converts a string to an integer
+    ld x1, 0(sp)             
     ld x14, 8(sp)
     addi sp, sp, 32
     
@@ -39,12 +46,12 @@ read_done:
     # x12 = n, x13 = arr
 mallocing_result:
     addi sp, sp, -16         
-    sd ra, 0(sp)             
+    sd x1, 0(sp)             
     addi x10, s2, 0          #Move n to a0
     slli x10, x10, 3        
     call malloc
     addi s5, x10, 0          #x10 -> s5 = result pointer
-    ld ra, 0(sp)
+    ld x1, 0(sp)
     addi sp, sp, 16
     
     addi x31, sp, 0          #x31 will now store my initial stack pointer
@@ -109,11 +116,11 @@ print_loop:
     ld x11, 0(x6)          #x11 = result[i] (second arg to printf)
     
     addi sp, sp, -16        
-    sd ra, 0(sp)            
+    sd x1, 0(sp)            
     sd x5, 8(sp)            
     la x10, fmt            #first arg = format string
     call printf
-    ld ra, 0(sp)
+    ld x1, 0(sp)
     ld x5, 8(sp)
     addi sp, sp, 16
     
@@ -123,7 +130,7 @@ print_done:
     la x10, fmt_nl
     call printf
     
-    ld ra, 0(sp)             
+    ld x1, 0(sp)             
     addi sp, sp, 16
     addi x10, x0, 0        #return 0
     ret

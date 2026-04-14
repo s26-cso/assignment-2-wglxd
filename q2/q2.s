@@ -13,7 +13,7 @@ main:
     addi s2, x10, -1         #x12 -> s2 = n = argc - 1
     addi x11, x11, 8         #skip argv[0] (8 bytes now)
     addi s3, x11, 0          #x11 -> s3 = argv pointer
-                             #malloc for arr
+                             
     addi sp, sp, -16         
     sd x1, 0(sp)             
     addi x10, s2, 0          #Move n to a0

@@ -7,11 +7,11 @@ fmt_negative : .asciz "No\n"
 
 
 .section .text 
-.globl _start
+.globl main
 .extern printf                 #Simple to not throw an error during linking.
 
 
-_start:
+main:
     li x10, -100
     la x11, filename            #calling openat syscall here
     li x12, 0                   

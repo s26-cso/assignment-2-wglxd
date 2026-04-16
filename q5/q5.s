@@ -18,16 +18,16 @@ _start:
     li x13, 0                   #x13 = 0, read only mode.
     li x17, 56
     ecall
-    mv x5, x10                  #Stores the fd now in x5.
+    mv x8, x10                  #Stores the fd now in x8.
     j read_file
 read_file:
-    mv x10, x5                  #Double check although not needed.
+    mv x10, x8                  #Double check although not needed.
     li x11, 0                   # lseek syscall called here with syscall number 62, offset 0
     li x12, 2                   # starts from end
     li x17, 62                  
     ecall
-    addi x28, x0, 0    #x28 now stores the forward pointer
-    addi x29, x10, -1    #x29 now stores the backward pointer
+    addi x9, x0, 0    #x9 now stores the forward pointer
+    addi x18, x10, -1    #x18 now stores the backward pointer
     mv x6, x10         #x6 now stores the file size
     addi x6, x6, -1    #x6 now stores n-1
     j pointer_logic
@@ -35,18 +35,18 @@ read_file:
 pointer_logic:
     
 
-    bge x28, x29, CORRECT      #Need to add base case, forward_pointer <= backwards_pointer
+    bge x9, x18, CORRECT      #Need to add base case, forward_pointer <= backwards_pointer
 
-    mv x10, x5                 #x10 now stores the file descriptor
+    mv x10, x8                 #x10 now stores the file descriptor
     addi sp, sp, -48           #stack mem allocation 
     sd x6, 0(sp)               #x6 stores n-1
-    sd x28, 8(sp)              #x28 is the forward offset
-    sd x29, 16(sp)             #x29 is the backward offset
+    sd x9, 8(sp)              #x9 is the forward offset
+    sd x18, 16(sp)             #x18 is the backward offset
     sd x10, 24(sp)             #x10 still has the fd
     sd x1, 32(sp)
 
 
-    addi x11, x28, 0           #Calling lseek here.
+    addi x11, x9, 0           #Calling lseek here.
     li x12, 0
     li x17, 62
     ecall
@@ -55,7 +55,7 @@ pointer_logic:
     call forward_pointer    #x10 could have been changed here, as its a call
     ld x10, 24(sp)          #restoring x10 back, now again stores the fd
 
-    addi x11, x29, 0
+    addi x11, x18, 0
     li x12, 0               #Calling lseek here again.
     li x17, 62
     ecall
@@ -64,8 +64,8 @@ pointer_logic:
     call backward_pointer   #x10 changed again
     ld x10, 24(sp)          #x10 now has fd again
     ld x1, 32(sp)
-    ld x29, 16(sp)
-    ld x28, 8(sp)
+    ld x18, 16(sp)
+    ld x9, 8(sp)
     ld x6, 0(sp)
 
     addi sp, sp, 48
@@ -77,8 +77,8 @@ pointer_logic:
     bne x30, x31, INCORRECT                       #Need to add buffer check here
 
 
-    addi x28, x28, 1
-    addi x29, x29, -1
+    addi x9, x9, 1
+    addi x18, x18, -1
     j pointer_logic
 
 

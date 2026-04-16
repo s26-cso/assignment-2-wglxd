@@ -1,6 +1,7 @@
 .section .data
 fmt: .string "%ld "
-fmt_nl: .string "\n"
+fmt_last:  .string "%ld"
+fmt_nl:    .string "\n"
 
 
 
@@ -118,8 +119,16 @@ print_loop:
     addi sp, sp, -16        
     sd x1, 0(sp)            
     sd x5, 8(sp)            
-    la x10, fmt            #first arg = format string
-    call printf
+    
+    addi x6, s2, -1
+    la x10, fmt
+    bne x5, x6, do_print
+    la x10, fmt_last
+
+    do_print:
+        call printf
+
+
     ld x1, 0(sp)
     ld x5, 8(sp)
     addi sp, sp, 16
